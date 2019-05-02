@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef } from '@angular/core';
 
-declare var ol: any;
+import * as L from 'leaflet';
+import 'leaflet-mouse-position';
+
 declare var UIkit: any;
 
 @Component({
@@ -10,30 +12,27 @@ declare var UIkit: any;
 })
 export class MapComponent implements OnInit {
 
-  map: any;
+  map: L.Map;
 
-  longitude = -48.497420;
-  latitude = -27.627436;
+  longitude = -48.527420;
+  latitude = -27.597436;
+
+  options = {
+    layers: [
+      L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '...' })
+    ],
+    zoom: 14,
+    center: L.latLng(-27.597436, -48.527420)
+  };
 
   constructor() { }
 
   ngOnInit() {
-    this.map = new ol.Map({
-      target: 'map',
-      layers: [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()
-        })
-      ]
-    });
+    this.map = L.map(document.getElementById('map'), this.options);
 
-    this.setCenter();
-  }
-
-  setCenter() {
-    var view = this.map.getView();
-    view.setCenter(ol.proj.fromLonLat([this.longitude, this.latitude]));
-    view.setZoom(11);
+    this.map.zoomControl.setPosition('bottomright');
+    L.control.mousePosition().addTo(this.map);
+    L.control.scale({ position: 'bottomleft' }).addTo(this.map);
   }
 
 }

@@ -1,3 +1,17 @@
 .map {
-  height: 100vh;
+  height: calc(100vh - 82px);
+  width: 100%;
+}
+
+.navbar-director {
+  border-top: 5px solid #2FB9F0;
+  box-shadow: 1px 1px 1px #d8d8d8;
+  position: relative;
+  top: 0px;
+  z-index: 1500;
+}
+
+.uk-navbar-nav > li {
+  padding: 15px;
+  color: white;
 }

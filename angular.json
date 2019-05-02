@@ -28,11 +28,14 @@
             ],
             "styles": [
               "node_modules/uikit/dist/css/uikit.min.css",
+              "node_modules/leaflet/dist/leaflet.css",
               "src/styles.scss"
             ],
             "scripts": [
               "node_modules/uikit/dist/js/uikit.min.js",
-              "node_modules/uikit/dist/js/uikit-icons.min.js"
+              "node_modules/uikit/dist/js/uikit-icons.min.js",
+              "node_modules/leaflet/dist/leaflet.js",
+              "node_modules/leaflet-mouse-position/src/L.Control.MousePosition.js"
             ],
             "es5BrowserSupport": true
           },
