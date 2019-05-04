@@ -14,5 +14,6 @@ interface NodeModule {
 declare namespace L {
   namespace control {
     function mousePosition();
+    function measure(options: any);
   }
 }

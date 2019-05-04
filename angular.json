@@ -27,7 +27,7 @@
               "src/assets"
             ],
             "styles": [
-              "node_modules/uikit/dist/css/uikit.min.css",
+              "node_modules/uikit/dist/css/uikit.min.css",          
               "node_modules/leaflet/dist/leaflet.css",
               "src/styles.scss"
             ],
