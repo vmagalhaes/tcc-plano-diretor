@@ -10,3 +10,9 @@
   <div id="map" class="map"></div>
   <div id="tooltip" class="tooltip">{{ mouseTooltip }}</div>
 </div>
+
+<div class="bottom-container">
+  <div class="search-container">
+    <button [disabled]="measuring" (click)="startMeasure()" class="uk-button uk-button-primary">{{ measuring ? 'Em andamento' : 'Iniciar busca' }}</button>
+  </div>
+</div>

@@ -22,6 +22,24 @@ body {
   display: none;
 }
 
+.leaflet-control-measure h3, .leaflet-measure-resultpopup h3 {
+  margin: 0 !important;
+  border-bottom: none !important;
+}
+
+.tasks {
+  border-top: none !important;
+}
+
+.polygon-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.color-data {
+  color: #6b6b6b;
+}
+
 /* --------- LEAFLET MEASURE --------- */
 $color-divider: #ddd;
 $color-button: #5e66cc;

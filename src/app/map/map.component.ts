@@ -29,6 +29,7 @@ export class MapComponent implements OnInit {
   measureControl: any;
   mouseTooltip: string;
   polygonsList: any[] = [];
+  measuring = false;
 
   constructor() { }
 
@@ -37,11 +38,14 @@ export class MapComponent implements OnInit {
 
     this.map.on('measurestart', () => {
       this.mouseTooltip = 'Clique no mapa para iniciar';
+      this.measuring = true;
+      this.startTooltip();
     });
 
     this.map.on('measurefinish', (event) => {
       this.polygonsList.push(event);
-      // this.measureControl._startMeasure();      
+      this.stopTooltip();
+      this.measuring = false;
       this.measureControl.options.polygonName = 'Polígono ' + this.polygonsList.length;
     });
 
@@ -53,10 +57,27 @@ export class MapComponent implements OnInit {
       }
     });
 
-    document.getElementById('map').onmousemove = (event) => {
-      document.getElementById('tooltip').setAttribute('style', `left: ${event.pageX + 10}px; top: ${event.pageY}px`);
-    }
+    this.initControls();
+  }
 
+  startMeasure() {
+    this.measureControl._startMeasure();
+  }
+
+  startTooltip() {
+    document.getElementById('map').onmousemove = (event) => {
+      document.getElementById('tooltip').setAttribute('style', `display: inline-block; left: ${event.pageX + 10}px; top: ${event.pageY}px`);
+    }
+  }
+
+  stopTooltip() {
+    document.getElementById('map').onmousemove = (event) => {
+      document.getElementById('tooltip').setAttribute('style', `display: none`);
+      event.stopPropagation();
+    }
+  }
+
+  initControls() {
     this.map.zoomControl.setPosition('bottomright');
     L.control.mousePosition().addTo(this.map);
     L.control.scale({ position: 'bottomleft' }).addTo(this.map);
@@ -70,7 +91,6 @@ export class MapComponent implements OnInit {
     });
 
     this.measureControl.addTo(this.map);
-    this.measureControl._startMeasure();
   }
 
 }

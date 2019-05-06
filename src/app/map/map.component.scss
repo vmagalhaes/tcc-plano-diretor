@@ -17,7 +17,7 @@
 }
 
 .tooltip {
-  display: inline-block;
+  display: none;
   position: fixed;
   z-index: 999;
   padding: .1em .3em;
@@ -25,4 +25,30 @@
   color: white;
   font-size: 11px;
   border: 1px solid black;
+}
+
+.bottom-container {
+  display: table;
+  position: fixed;
+  z-index: 999;
+  width: 100%;
+  bottom: 10px;
+
+  .search-container {
+    display: table-cell;
+    text-align: center; 
+    vertical-align: bottom;
+
+    .uk-button-primary {
+      background-color: #002f66;
+
+      &:hover {
+        background-color: #2FB9F0;
+      }
+
+      &:disabled {
+        background-color: rgb(204, 204, 204);
+      }
+    }
+  }
 }

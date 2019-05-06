@@ -1980,7 +1980,22 @@
     },
     function(e, t, r) {
       e.exports =
-        '<h3>{{ model.polygonName }}</h3> <p>{{ model.areaDisplay }}</p> <p>{{ model.lengthDisplay }} Perímetro</p> <ul class=tasks> <li><a href=# class="js-zoomto zoomto">Centralizar nesta área</a></li> <li><a href=# class="js-deletemarkup deletemarkup">Excluir</a></li> </ul> ';
+       `<h3>{{ model.polygonName }}</h3>
+        <ul class="uk-list polygon-list uk-list-striped uk-margin-remove-top uk-margin-remove-bottom">
+          <li>
+            <div class="uk-child-width-1-2" uk-grid>
+              <div>Área</div>
+              <div class="uk-padding-remove-left color-data">{{ model.lengthDisplay }} Perímetro</div>
+            </div>
+          </li>
+          <li>List item 2</li>
+          <li>List item 3</li>
+        </ul>
+        <ul class="tasks uk-margin-remove-top">
+          <li><a href=# class="js-zoomto zoomto">Centralizar nesta área</a></li>
+          <li><a href=# class="js-deletemarkup deletemarkup">Excluir</a></li>
+        </ul>
+       `;
     }
   ]);
   
