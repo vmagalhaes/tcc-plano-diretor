@@ -109,7 +109,13 @@ export class MapComponent implements OnInit {
             <ul class="tasks uk-margin-remove-top">
               <li><a id="zoomto-${this.polygonsCount}" class="js-zoom zoomto">Centralizar nesta área</a></li>
               <li><a id="delete-${this.polygonsCount}" class="js-deletemarkup deletemarkup">Excluir</a></li>
-            </ul>`;
+            </ul>
+            <hr>
+            <ul class="uk-margin-remove-top uk-padding-remove-left external-links">
+              <li><a target="_blank" href="http://www.pmf.sc.gov.br/arquivos/arquivos/pdf/18_07_2014_10.03.37.82e294196c4df9b7c1459599611bd6ee.pdf" class="link">Tabela de adequação de uso</a></li>
+              <li><a target="_blank" href="http://www.pmf.sc.gov.br/arquivos/arquivos/pdf/18_07_2014_10.02.53.9bc76f3acfe3be22bc5373423ae3f59b.pdf" class="link">Tabela de limites de ocupação</a></li>
+            </lu>
+            `;
 
             const customOptions = {
               maxWidth: 800,
