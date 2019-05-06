@@ -767,7 +767,6 @@
             this.count = 0;
         },
         _finishMeasure: function() {
-          console.log('_finishMeasure')
           var e = L.extend({}, this._resultsModel, { points: this._latlngs });
           (this._locked = !1),
             L.DomEvent.off(this._container, 'mouseover', this._handleMapMouseOut, this),

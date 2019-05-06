@@ -6,7 +6,6 @@ import turf from 'turf';
 import 'leaflet-mouse-position';
 import 'src/assets/js/leaflet-measure.pt_BR';
 import { ClickHandler } from 'src/app/map/handler/click-handler';
-import { Subscription } from 'rxjs/internal/Subscription';
 import { UlandService } from '../services/uland.service';
 
 declare var UIkit: any;
@@ -34,11 +33,10 @@ export class MapComponent implements OnInit {
 
   measureControl: any;
   mouseTooltip: string;
-  polygonsList: any[] = [{}];
+  polygonsCount: number = 0;
   measuring = false;
-  marker: L.Marker;
-
-  private mapClickSubscription: Subscription;
+  marker: any;
+  markerGroup = new L.LayerGroup();
 
   constructor(
     private ulandService: UlandService
@@ -46,6 +44,7 @@ export class MapComponent implements OnInit {
 
   ngOnInit() {
     this.map = L.map(document.getElementById('map'), this.options);
+
     this.ulandService
       .getSources()
       .subscribe((sources) => {
@@ -66,29 +65,29 @@ export class MapComponent implements OnInit {
     });
 
     this.map.on('measurefinish', (event: any) => {
-      this.polygonsList.push(event);
+      this.polygonsCount++;
       this.stopTooltip();
       this.measuring = false;
       const bounds = new L.LatLngBounds(event.points);
-      const coordinates = event.points.map(point => [point.lat, point.lng]);
+      const northWest = bounds.getNorthWest(),
+        northEast = bounds.getNorthEast(),
+        distance = northWest.distanceTo(northEast),
+        distanceFromCenter = distance / 2;
 
-      this.marker = L.marker(bounds.getCenter(), {
+      const marker = <any>(L.marker(bounds.getCenter(), {
         icon: L.divIcon({
             className: 'leaflet-mouse-marker',
             iconAnchor: [20, 20],
-            iconSize: [40, 40]
+            iconSize: [50, 50]
         }),
         opacity: 0
-      });
+      }));
 
       this.map.eachLayer((layer: any) => {
         if (layer.feature) {
           if (this.isMarkerInsidePolygon([bounds.getCenter().lat, bounds.getCenter().lng], layer)) {
-            console.log(event);
-            this.measureControl.options.properties = layer.feature.properties;
-            this.measureControl.options.keys = Object.keys(layer.feature.properties);
             const customPopup =
-           `<h3>${'Polígono ' + this.polygonsList.length}</h3>
+           `<h3>${'Polígono ' + this.polygonsCount}</h3>
             <ul class="uk-list polygon-list uk-list-striped uk-margin-remove-top uk-margin-remove-bottom">
               <li>
                 <div class="uk-child-width-1-2" uk-grid>
@@ -108,22 +107,42 @@ export class MapComponent implements OnInit {
               }).join('') +
            `</ul>
             <ul class="tasks uk-margin-remove-top">
-              <li><a id="zoomto">Centralizar nesta área</a></li>
-              <li><a href=# class="js-deletemarkup deletemarkup">Excluir</a></li>
+              <li><a id="zoomto-${this.polygonsCount}" class="js-zoom zoomto">Centralizar nesta área</a></li>
+              <li><a id="delete-${this.polygonsCount}" class="js-deletemarkup deletemarkup">Excluir</a></li>
             </ul>`;
 
             const customOptions = {
               maxWidth: 800,
-              className : 'custom-popup'
+              className : 'custom-popup',
+              polygonsCount: this.polygonsCount,
+              bounds
             }
 
-            this.marker.bindPopup(customPopup, customOptions).addTo(this.map);
+            marker
+              .bindPopup(customPopup, customOptions)
+              .on('popupopen', (popupContainer) => {
+                this.deleteLayer(popupContainer.popup.options.polygonsCount);
+                this.zoomTo(popupContainer.popup.options.polygonsCount);
+              })
+              .addTo(this.map);
           }
         }
       });
 
       setTimeout(() => {
-        this.marker.openPopup();
+        marker.openPopup();
+
+        this.map.eachLayer((layer: any) => {
+          if (layer._path) {
+            if (layer._path.classList[0] === 'layer-measure-resultarea') {
+              layer._path.onclick = () => {
+                marker.openPopup()
+              };
+              marker.layer = layer;
+              this.markerGroup.addLayer(marker);
+            }
+          }
+        });
       });
     });
 
@@ -135,24 +154,30 @@ export class MapComponent implements OnInit {
       }
     });
 
-    this.mapClickSubscription = this.clickHandler.mapClick$.subscribe((event: any) => {
-      // this.map.eachLayer((layer: any) => {
-      //   if (layer.feature) {
-      //     if (this.isMarkerInsidePolygon([event.latlng.lat, event.latlng.lng], layer)) {
-      //       console.log(layer)
-      //     }
-      //   }
-      // });
-    });
-
     this.startLayer();
-
     this.initControls();
   }
 
-  zoomTo() {
-    document.getElementById('zoomto').onclick = (event) => {
-      console.log(event);
+  zoomTo(id: number) {
+    document.getElementById('zoomto-' + id).onclick = () => {
+      _.forEach(this.markerGroup.getLayers(), (marker) => {
+        if (marker.isPopupOpen) {
+          this.map.fitBounds(new L.FeatureGroup([marker]).getBounds(), { padding: [20, 20], maxZoom: 17 });
+        }
+      });
+    };
+  }
+
+  deleteLayer(id: number) {
+    document.getElementById('delete-' + id).onclick = () => {
+      _.forEach(this.markerGroup.getLayers(), (marker) => {
+        if (marker.isPopupOpen()) {
+          this.map.removeLayer(marker.layer);
+          this.map.removeLayer(marker);
+          this.markerGroup.removeLayer(marker);
+          this.polygonsCount--;
+        }
+      });
     };
   }
 
