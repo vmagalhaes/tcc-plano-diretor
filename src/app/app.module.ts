@@ -6,6 +6,8 @@ import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { MapComponent } from './map/map.component';
+import { UlandService } from './services/uland.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -15,9 +17,12 @@ import { MapComponent } from './map/map.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    LeafletModule.forRoot()
+    LeafletModule.forRoot(),
+    HttpClientModule
   ],
-  providers: [],
+  providers: [
+    UlandService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

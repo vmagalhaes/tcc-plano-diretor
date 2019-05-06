@@ -7,6 +7,7 @@ import 'leaflet-mouse-position';
 import 'src/assets/js/leaflet-measure.pt_BR';
 import { ClickHandler } from 'src/app/map/handler/click-handler';
 import { Subscription } from 'rxjs/internal/Subscription';
+import { UlandService } from '../services/uland.service';
 
 declare var UIkit: any;
 
@@ -35,13 +36,23 @@ export class MapComponent implements OnInit {
   mouseTooltip: string;
   polygonsList: any[] = [{}];
   measuring = false;
+  marker: L.Marker;
 
   private mapClickSubscription: Subscription;
 
-  constructor() { }
+  constructor(
+    private ulandService: UlandService
+  ) { }
 
   ngOnInit() {
     this.map = L.map(document.getElementById('map'), this.options);
+    this.ulandService
+      .getSources()
+      .subscribe((sources) => {
+        console.log(sources);
+      }, (error) => {
+        console.log(error);
+      });
 
     if (!this.clickHandler) {
       this.clickHandler = new ClickHandler(this.map);
@@ -61,7 +72,7 @@ export class MapComponent implements OnInit {
       const bounds = new L.LatLngBounds(event.points);
       const coordinates = event.points.map(point => [point.lat, point.lng]);
 
-      const marker = L.marker(bounds.getCenter(), {
+      this.marker = L.marker(bounds.getCenter(), {
         icon: L.divIcon({
             className: 'leaflet-mouse-marker',
             iconAnchor: [20, 20],
@@ -73,32 +84,46 @@ export class MapComponent implements OnInit {
       this.map.eachLayer((layer: any) => {
         if (layer.feature) {
           if (this.isMarkerInsidePolygon([bounds.getCenter().lat, bounds.getCenter().lng], layer)) {
-            this.measureControl.options.polygonName = 'Polígono ' + this.polygonsList.length;
+            console.log(event);
             this.measureControl.options.properties = layer.feature.properties;
             this.measureControl.options.keys = Object.keys(layer.feature.properties);
-            const customPopup = `<h3>${this.measureControl.options.polygonName }</h3>
+            const customPopup =
+           `<h3>${'Polígono ' + this.polygonsList.length}</h3>
             <ul class="uk-list polygon-list uk-list-striped uk-margin-remove-top uk-margin-remove-bottom">
               <li>
                 <div class="uk-child-width-1-2" uk-grid>
                   <div>Área</div>
-                  <div class="uk-padding-remove-left color-data">${this.measureControl.options.lengthDisplay} Perímetro</div>
+                  <div class="uk-padding-remove-left color-data">${event.lengthDisplay} Perímetro</div>
                 </div>
               </li>
-            </ul>
+              ` +
+              _.map(Object.keys(layer.feature.properties), (key) => {
+                return `
+                <li>
+                  <div class="uk-child-width-1-2" uk-grid>
+                    <div>${key}</div>
+                    <div class="uk-padding-remove-left color-data">${layer.feature.properties[key]}</div>
+                  </div>
+                </li>`;
+              }).join('') +
+           `</ul>
             <ul class="tasks uk-margin-remove-top">
-              <li><a href=# class="js-zoomto zoomto">Centralizar nesta área</a></li>
+              <li><a id="zoomto">Centralizar nesta área</a></li>
               <li><a href=# class="js-deletemarkup deletemarkup">Excluir</a></li>
             </ul>`;
-           
+
             const customOptions = {
-              maxWidth: 500,
-              className : 'custom'
+              maxWidth: 800,
+              className : 'custom-popup'
             }
 
-            marker.bindPopup(customPopup, customOptions).addTo(this.map);
-            marker.openPopup();
+            this.marker.bindPopup(customPopup, customOptions).addTo(this.map);
           }
         }
+      });
+
+      setTimeout(() => {
+        this.marker.openPopup();
       });
     });
 
@@ -123,6 +148,12 @@ export class MapComponent implements OnInit {
     this.startLayer();
 
     this.initControls();
+  }
+
+  zoomTo() {
+    document.getElementById('zoomto').onclick = (event) => {
+      console.log(event);
+    };
   }
 
   startMeasure() {
@@ -189,7 +220,7 @@ export class MapComponent implements OnInit {
         }
     }
 
-    return inside;    
+    return inside;
   };
 
 }

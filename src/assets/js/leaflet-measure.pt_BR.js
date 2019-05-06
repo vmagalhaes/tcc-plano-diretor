@@ -911,7 +911,6 @@
               )),
               t.addTo(this._layer),
               t.bindPopup(o, this.options.popupOptions),
-              console.log('bindPopup'),
               t.getBounds
                 ? t.openPopup(t.getBounds().getCenter())
                 : t.getLatLng && t.openPopup(t.getLatLng());

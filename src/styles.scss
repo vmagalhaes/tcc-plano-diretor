@@ -26,7 +26,7 @@ body {
   display: none !important;
 }
 
-.leaflet-control-measure h3, .leaflet-measure-resultpopup h3 {
+.leaflet-control-measure h3, .custom-popup h3 {
   margin: 0 !important;
   border-bottom: none !important;
 }
@@ -94,7 +94,7 @@ $button-icon-spacing: 4px;
 }
 
 .leaflet-control-measure,
-.leaflet-measure-resultpopup {
+.custom-popup {
   h3 {
     margin: 0 0 $spacing-external 0;
     padding-bottom: $spacing-internal;
@@ -205,7 +205,7 @@ $button-icon-spacing: 4px;
   }
 }
 
-.leaflet-measure-resultpopup {
+.custom-popup {
   a.zoomto {
     @include button(focus);
   }
