@@ -33,7 +33,7 @@ export class MapComponent implements OnInit {
 
   measureControl: any;
   mouseTooltip: string;
-  polygonsList: any[] = [];
+  polygonsList: any[] = [{}];
   measuring = false;
 
   private mapClickSubscription: Subscription;
@@ -58,22 +58,46 @@ export class MapComponent implements OnInit {
       this.polygonsList.push(event);
       this.stopTooltip();
       this.measuring = false;
-      this.measureControl.options.polygonName = 'Polígono ' + this.polygonsList.length;
-      event.points.push(event.points[0]);
+      const bounds = new L.LatLngBounds(event.points);
       const coordinates = event.points.map(point => [point.lat, point.lng]);
+
+      const marker = L.marker(bounds.getCenter(), {
+        icon: L.divIcon({
+            className: 'leaflet-mouse-marker',
+            iconAnchor: [20, 20],
+            iconSize: [40, 40]
+        }),
+        opacity: 0
+      });
 
       this.map.eachLayer((layer: any) => {
         if (layer.feature) {
-          // const x = [coordinates];
-          // const y = layer.feature.geometry.coordinates[0];
-          // const poly1 = turf.polygon(x);
-          // const poly2 = turf.polygon(y);
-          
-          // const intersection = turf.intersect(poly1, poly2);
-          // console.log(intersection)
-          // if (this.isMarkerInsidePolygon([event.latlng.lat, event.latlng.lng], layer)) {
-          //   console.log(layer)
-          // }
+          if (this.isMarkerInsidePolygon([bounds.getCenter().lat, bounds.getCenter().lng], layer)) {
+            this.measureControl.options.polygonName = 'Polígono ' + this.polygonsList.length;
+            this.measureControl.options.properties = layer.feature.properties;
+            this.measureControl.options.keys = Object.keys(layer.feature.properties);
+            const customPopup = `<h3>${this.measureControl.options.polygonName }</h3>
+            <ul class="uk-list polygon-list uk-list-striped uk-margin-remove-top uk-margin-remove-bottom">
+              <li>
+                <div class="uk-child-width-1-2" uk-grid>
+                  <div>Área</div>
+                  <div class="uk-padding-remove-left color-data">${this.measureControl.options.lengthDisplay} Perímetro</div>
+                </div>
+              </li>
+            </ul>
+            <ul class="tasks uk-margin-remove-top">
+              <li><a href=# class="js-zoomto zoomto">Centralizar nesta área</a></li>
+              <li><a href=# class="js-deletemarkup deletemarkup">Excluir</a></li>
+            </ul>`;
+           
+            const customOptions = {
+              maxWidth: 500,
+              className : 'custom'
+            }
+
+            marker.bindPopup(customPopup, customOptions).addTo(this.map);
+            marker.openPopup();
+          }
         }
       });
     });

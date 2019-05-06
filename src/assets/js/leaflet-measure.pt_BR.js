@@ -1988,8 +1988,7 @@
               <div class="uk-padding-remove-left color-data">{{ model.lengthDisplay }} Perímetro</div>
             </div>
           </li>
-          <li>List item 2</li>
-          <li>List item 3</li>
+          {{ model.keys }}
         </ul>
         <ul class="tasks uk-margin-remove-top">
           <li><a href=# class="js-zoomto zoomto">Centralizar nesta área</a></li>

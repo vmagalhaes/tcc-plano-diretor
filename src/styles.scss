@@ -22,6 +22,10 @@ body {
   display: none;
 }
 
+.leaflet-measure-resultpopup {
+  display: none !important;
+}
+
 .leaflet-control-measure h3, .leaflet-measure-resultpopup h3 {
   margin: 0 !important;
   border-bottom: none !important;
