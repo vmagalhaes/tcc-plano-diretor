@@ -767,7 +767,6 @@
             this.count = 0;
         },
         _finishMeasure: function() {
-          console.log('_finishMeasure')
           var e = L.extend({}, this._resultsModel, { points: this._latlngs });
           (this._locked = !1),
             L.DomEvent.off(this._container, 'mouseover', this._handleMapMouseOut, this),
@@ -911,7 +910,6 @@
               )),
               t.addTo(this._layer),
               t.bindPopup(o, this.options.popupOptions),
-              console.log('bindPopup'),
               t.getBounds
                 ? t.openPopup(t.getBounds().getCenter())
                 : t.getLatLng && t.openPopup(t.getLatLng());
@@ -1988,8 +1986,7 @@
               <div class="uk-padding-remove-left color-data">{{ model.lengthDisplay }} Perímetro</div>
             </div>
           </li>
-          <li>List item 2</li>
-          <li>List item 3</li>
+          {{ model.keys }}
         </ul>
         <ul class="tasks uk-margin-remove-top">
           <li><a href=# class="js-zoomto zoomto">Centralizar nesta área</a></li>
