@@ -13,6 +13,6 @@
 
 <div class="bottom-container">
   <div class="search-container">
-    <button [disabled]="measuring" (click)="startMeasure()" class="uk-button uk-button-primary">{{ measuring ? 'Em andamento' : 'Iniciar busca' }}</button>
+    <button (click)="measuring ? stopMeasure() : startMeasure()" class="uk-button uk-button-primary">{{ measuring ? 'Finalizar desenho' : 'Iniciar busca' }}</button>
   </div>
 </div>

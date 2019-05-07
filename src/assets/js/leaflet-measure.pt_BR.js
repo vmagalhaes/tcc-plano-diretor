@@ -763,7 +763,7 @@
               .on('resize', this._setCaptureMarkerIcon, this),
             L.DomEvent.on(this._container, 'mouseenter', this._handleMapMouseOut, this),
             this._updateMeasureStartedNoPoints(),
-            this._map.fire('measurestart', null, !1);
+            this._map.fire('measurestart', this._captureMarker, !1);
             this.count = 0;
         },
         _finishMeasure: function() {
@@ -871,49 +871,51 @@
           var e = this._latlngs,
             t = void 0,
             r = void 0;
-          if ((this._finishMeasure(), e.length)) {
-            e.length > 2 && e.push(e[0]);
-            var n = (0, l.default)(e);
-            1 === e.length
-              ? ((t = L.circleMarker(e[0], this._symbols.getSymbol('resultPoint'))),
-                (r = b({ model: n })))
-              : 2 === e.length
-              ? ((t = L.polyline(e, this._symbols.getSymbol('resultLine'))),
-                (r = _({ model: L.extend({}, n, this._getMeasurementDisplayStrings(n)) })))
-              : ((t = L.polygon(e, this._symbols.getSymbol('resultArea'))),
-                (r = j({ model: L.extend({}, n, this._getMeasurementDisplayStrings(n)) })));
-            var o = L.DomUtil.create('div', '');
-            o.innerHTML = r;
-            var i = (0, c.selectOne)('.js-zoomto', o);
-            i &&
-              (L.DomEvent.on(i, 'click', L.DomEvent.stop),
-              L.DomEvent.on(
-                i,
-                'click',
-                function() {
+            if (e.length > 2) {
+              if ((this._finishMeasure(), e.length)) {
+                e.length > 2 && e.push(e[0]);
+                var n = (0, l.default)(e);
+                1 === e.length
+                  ? ((t = L.circleMarker(e[0], this._symbols.getSymbol('resultPoint'))),
+                    (r = b({ model: n })))
+                  : 2 === e.length
+                  ? ((t = L.polyline(e, this._symbols.getSymbol('resultLine'))),
+                    (r = _({ model: L.extend({}, n, this._getMeasurementDisplayStrings(n)) })))
+                  : ((t = L.polygon(e, this._symbols.getSymbol('resultArea'))),
+                    (r = j({ model: L.extend({}, n, this._getMeasurementDisplayStrings(n)) })));
+                var o = L.DomUtil.create('div', '');
+                o.innerHTML = r;
+                var i = (0, c.selectOne)('.js-zoomto', o);
+                i &&
+                  (L.DomEvent.on(i, 'click', L.DomEvent.stop),
+                  L.DomEvent.on(
+                    i,
+                    'click',
+                    function() {
+                      t.getBounds
+                        ? this._map.fitBounds(t.getBounds(), { padding: [20, 20], maxZoom: 17 })
+                        : t.getLatLng && this._map.panTo(t.getLatLng());
+                    },
+                    this
+                  ));
+                var s = (0, c.selectOne)('.js-deletemarkup', o);
+                s &&
+                  (L.DomEvent.on(s, 'click', L.DomEvent.stop),
+                  L.DomEvent.on(
+                    s,
+                    'click',
+                    function() {
+                      this._layer.removeLayer(t);
+                    },
+                    this
+                  )),
+                  t.addTo(this._layer),
+                  t.bindPopup(o, this.options.popupOptions),
                   t.getBounds
-                    ? this._map.fitBounds(t.getBounds(), { padding: [20, 20], maxZoom: 17 })
-                    : t.getLatLng && this._map.panTo(t.getLatLng());
-                },
-                this
-              ));
-            var s = (0, c.selectOne)('.js-deletemarkup', o);
-            s &&
-              (L.DomEvent.on(s, 'click', L.DomEvent.stop),
-              L.DomEvent.on(
-                s,
-                'click',
-                function() {
-                  this._layer.removeLayer(t);
-                },
-                this
-              )),
-              t.addTo(this._layer),
-              t.bindPopup(o, this.options.popupOptions),
-              t.getBounds
-                ? t.openPopup(t.getBounds().getCenter())
-                : t.getLatLng && t.openPopup(t.getLatLng());
-          }
+                    ? t.openPopup(t.getBounds().getCenter())
+                    : t.getLatLng && t.openPopup(t.getLatLng());
+              }
+            }
         },
         _handleMeasureClick: function(e) {
           this.count++;
@@ -1995,4 +1997,3 @@
        `;
     }
   ]);
-  

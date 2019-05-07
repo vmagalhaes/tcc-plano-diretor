@@ -37,6 +37,7 @@ export class MapComponent implements OnInit {
   measuring = false;
   marker: any;
   markerGroup = new L.LayerGroup();
+  captureClick: any;
 
   constructor(
     private ulandService: UlandService
@@ -58,7 +59,8 @@ export class MapComponent implements OnInit {
     }
     this.clickHandler.enable();
 
-    this.map.on('measurestart', () => {
+    this.map.on('measurestart', (event) => {
+      this.captureClick = event;
       this.mouseTooltip = 'Clique no mapa para iniciar';
       this.measuring = true;
       this.startTooltip();
@@ -110,7 +112,7 @@ export class MapComponent implements OnInit {
               <li><a id="zoomto-${this.polygonsCount}" class="js-zoom zoomto">Centralizar nesta área</a></li>
               <li><a id="delete-${this.polygonsCount}" class="js-deletemarkup deletemarkup">Excluir</a></li>
             </ul>
-            <hr>
+            <hr class="uk-margin-small-top uk-margin-small-bottom">
             <ul class="uk-margin-remove-top uk-padding-remove-left external-links">
               <li><a target="_blank" href="http://www.pmf.sc.gov.br/arquivos/arquivos/pdf/18_07_2014_10.03.37.82e294196c4df9b7c1459599611bd6ee.pdf" class="link">Tabela de adequação de uso</a></li>
               <li><a target="_blank" href="http://www.pmf.sc.gov.br/arquivos/arquivos/pdf/18_07_2014_10.02.53.9bc76f3acfe3be22bc5373423ae3f59b.pdf" class="link">Tabela de limites de ocupação</a></li>
@@ -190,6 +192,10 @@ export class MapComponent implements OnInit {
 
   startMeasure() {
     this.measureControl._startMeasure();
+  }
+
+  stopMeasure() {
+    this.captureClick.fireEvent('dblclick', null, this)
   }
 
   startTooltip() {
