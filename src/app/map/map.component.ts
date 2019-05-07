@@ -229,9 +229,32 @@ export class MapComponent implements OnInit {
     xhr.onload = () => {
       if (xhr.status !== 200) return
       const data = _.cloneDeep(xhr.response);
-      L.geoJSON(data).addTo(this.map);
+      L.geoJSON(data, {
+        style: (feature) => {
+          return {
+              weight: 1,
+              opacity: 1,
+              color: 'white',
+              fillOpacity: 0.7,
+              fillColor: this.getColor(feature.properties)
+          };
+        }
+      }).addTo(this.map);
     };
     xhr.send();
+  }
+
+  getColor(featureProperties: any) {
+    return featureProperties.nm_zon === 'ACI' ? '#FC4E2A' :
+           featureProperties.nm_zon === 'AMC' ? '#ca63b2' :
+           featureProperties.nm_zon === 'APL-E' ? '#7ba3e8' :
+           featureProperties.nm_zon === 'APP' ? '#1aec67' :
+           featureProperties.nm_zon === 'ARM' ? '#df3f59' :
+           featureProperties.nm_zon === 'ARP' ? '#FED976' :
+           featureProperties.nm_zon === 'ATL' ? '#a467c8' :
+           featureProperties.nm_zon === 'AVL' ? '#168de7' :
+           featureProperties.nm_zon === 'ZEI' ? '#d4d76c' :
+           '#000000';
   }
 
   isMarkerInsidePolygon([lat, lng], poly) {
