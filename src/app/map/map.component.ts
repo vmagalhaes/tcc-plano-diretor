@@ -225,6 +225,39 @@ export class MapComponent implements OnInit {
     });
 
     this.measureControl.addTo(this.map);
+
+    L.Control.Legends = L.Control.extend({
+      onAdd: (map) => {
+        const div = L.DomUtil.create('div', 'info legend');
+        let labels = ['<div class="uk-margin-small-bottom"><strong>Zoneamento</strong></div>'],
+        categories = [
+          'ACI',
+          'AMC',
+          'APL-E',
+          'APP',
+          'ARM',
+          'ARP',
+          'ATL',
+          'AVL',
+          'ZEI'
+        ];
+
+        for (let i = 0; i < categories.length; i++) {
+          div.innerHTML +=
+            labels.push(
+              '<div class="uk-margin-small-bottom"><i class="circle" style="background:' + this.getColor(categories[i]) + '"></i>' + (categories[i] ? categories[i] + '</div>' : '+'));
+        }
+
+        div.innerHTML = labels.join('');
+        return div;
+      }
+    });
+
+    L.control.legends = (options) => {
+      return new L.Control.Legends(options);
+    }
+
+    L.control.legends({ position: 'topright' }).addTo(this.map);
   }
 
   startLayer() {
@@ -242,7 +275,7 @@ export class MapComponent implements OnInit {
               opacity: 1,
               color: 'white',
               fillOpacity: 0.7,
-              fillColor: this.getColor(feature.properties)
+              fillColor: this.getColor(feature.properties.nm_zon)
           };
         }
       }).addTo(this.map);
@@ -250,16 +283,16 @@ export class MapComponent implements OnInit {
     xhr.send();
   }
 
-  getColor(featureProperties: any) {
-    return featureProperties.nm_zon === 'ACI' ? '#FC4E2A' :
-           featureProperties.nm_zon === 'AMC' ? '#ca63b2' :
-           featureProperties.nm_zon === 'APL-E' ? '#7ba3e8' :
-           featureProperties.nm_zon === 'APP' ? '#1aec67' :
-           featureProperties.nm_zon === 'ARM' ? '#df3f59' :
-           featureProperties.nm_zon === 'ARP' ? '#FED976' :
-           featureProperties.nm_zon === 'ATL' ? '#a467c8' :
-           featureProperties.nm_zon === 'AVL' ? '#168de7' :
-           featureProperties.nm_zon === 'ZEI' ? '#d4d76c' :
+  getColor(name: any) {
+    return name === 'ACI' ? '#FC4E2A' :
+           name === 'AMC' ? '#ca63b2' :
+           name === 'APL-E' ? '#7ba3e8' :
+           name === 'APP' ? '#1aec67' :
+           name === 'ARM' ? '#df3f59' :
+           name === 'ARP' ? '#FED976' :
+           name === 'ATL' ? '#a467c8' :
+           name === 'AVL' ? '#168de7' :
+           name === 'ZEI' ? '#d4d76c' :
            '#000000';
   }
 

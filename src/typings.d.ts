@@ -15,5 +15,12 @@ declare namespace L {
   namespace control {
     function mousePosition();
     function measure(options: any);
+    function legends(options: any);
+  }
+
+  namespace Control {
+    class Legends {
+      constructor(options?: any)
+    }
   }
 }
