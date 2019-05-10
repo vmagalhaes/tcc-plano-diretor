@@ -69,6 +69,7 @@ export class MapComponent implements OnInit {
     this.map.on('measurefinish', (event: any) => {
       this.polygonsCount++;
       this.stopTooltip();
+      let layerFeature: any;
       this.measuring = false;
       const bounds = new L.LatLngBounds(event.points);
       const northWest = bounds.getNorthWest(),
@@ -88,13 +89,17 @@ export class MapComponent implements OnInit {
       this.map.eachLayer((layer: any) => {
         if (layer.feature) {
           if (this.isMarkerInsidePolygon([bounds.getCenter().lat, bounds.getCenter().lng], layer)) {
+            event.polygonsCount = this.polygonsCount;
+            event.layer = layer;
+            layerFeature = layer;
+            this.addLayer(event);
             const customPopup =
-           `<h3>${'Polígono ' + this.polygonsCount}</h3>
+           `<h3>${'Polígono ' + event.polygonsCount}</h3>
             <ul class="uk-list polygon-list uk-list-striped uk-margin-remove-top uk-margin-remove-bottom">
               <li>
                 <div class="uk-child-width-1-2" uk-grid>
                   <div>Área</div>
-                  <div class="uk-padding-remove-left color-data">${event.lengthDisplay} Perímetro</div>
+                  <div class="uk-padding-remove-left color-data">${event.areaDisplay}</div>
                 </div>
               </li>
               ` +
@@ -147,7 +152,7 @@ export class MapComponent implements OnInit {
               layer._path.onclick = () => {
                 marker.openPopup()
               };
-              marker.layer = layer;
+              marker.layer = layerFeature;
               this.markerGroup.addLayer(marker);
             }
           }
@@ -170,7 +175,7 @@ export class MapComponent implements OnInit {
   zoomTo(id: number) {
     document.getElementById('zoomto-' + id).onclick = () => {
       _.forEach(this.markerGroup.getLayers(), (marker) => {
-        if (marker.isPopupOpen) {
+        if (marker.isPopupOpen()) {
           this.map.fitBounds(new L.FeatureGroup([marker]).getBounds(), { padding: [20, 20], maxZoom: 17 });
         }
       });
@@ -218,8 +223,8 @@ export class MapComponent implements OnInit {
 
     this.measureControl = L.control.measure({
       position: 'topright',
-      primaryLengthUnit: 'meters',
-      secondaryLengthUnit: 'hectares',
+      primaryAreaUnit: 'sqmeters',
+      secondaryAreaUnit: 'hectares',
       activeColor: '#00B9F0',
       completedColor: '#002F66'
     });
@@ -248,7 +253,7 @@ export class MapComponent implements OnInit {
               '<div class="uk-margin-small-bottom"><i class="circle" style="background:' + this.getColor(categories[i]) + '"></i>' + (categories[i] ? categories[i] + '</div>' : '+'));
         }
 
-        div.innerHTML = labels.join('');
+        div.innerHTML = '<div class="inside-legend-container">' + labels.join('') + '</div>';
         return div;
       }
     });
@@ -281,6 +286,41 @@ export class MapComponent implements OnInit {
       }).addTo(this.map);
     };
     xhr.send();
+  }
+
+  addLayer(layer: any) {
+    L.Control.LayersContainer = L.Control.extend({
+      onAdd: (map) => {
+        const div: any = L.DomUtil.create('div', 'layers-container');
+        div.id = 'layers-container-' + layer.polygonsCount
+        div.layer = layer;
+        div.innerHTML = `<div id="layer-${layer.polygonsCount}" class="layer">
+                           <i class="fas fa-layer-group"></i> ${layer.polygonName} ${this.polygonsCount}<span id="area-size-container-${layer.polygonsCount}" class="area-size-container">${layer.areaDisplay}</span>
+                         </div>`;
+        return div;
+      }
+    });
+
+    L.control.layersContainer = (options) => {
+      return new L.Control.LayersContainer(options);
+    }
+
+    L.control.layersContainer({ position: 'topleft' }).addTo(this.map);
+    document.getElementById('layer-' + layer.polygonsCount).onclick = (event: any) => {
+      const split = event.target.parentNode.id.split('-');
+
+      this.markerGroup.eachLayer((marker: any) => {
+        if (marker.layer._leaflet_id === layer.layer._leaflet_id) {
+          setTimeout(() => {
+            marker.openPopup();
+            this.zoomTo(parseInt(split[split.length - 1]));
+            setTimeout(() => {
+              document.getElementById('zoomto-' + split[split.length - 1]).click();
+            });
+          });
+        }
+      });
+    };
   }
 
   getColor(name: any) {

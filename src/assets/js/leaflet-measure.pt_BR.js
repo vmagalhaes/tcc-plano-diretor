@@ -716,7 +716,6 @@
             L.DomEvent.on(i, 'click', this._handleMeasureDoubleClick, this);
         },
         _expand: function() {
-          console.log('_expand')
           f.hide(this.$toggle), f.show(this.$interaction);
         },
         _collapse: function() {

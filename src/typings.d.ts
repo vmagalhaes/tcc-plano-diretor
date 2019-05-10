@@ -16,10 +16,15 @@ declare namespace L {
     function mousePosition();
     function measure(options: any);
     function legends(options: any);
+    function layersContainer(options: any);
   }
 
   namespace Control {
     class Legends {
+      constructor(options?: any)
+    }
+
+    class LayersContainer {
       constructor(options?: any)
     }
   }

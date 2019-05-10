@@ -44,14 +44,45 @@ body {
   color: #6b6b6b;
 }
 
+.layers-container {
+  width: 25em;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+
+  .layer {
+    background: white;
+    padding: 7px;
+    height: 100%;
+    border-radius: 5px;
+    font-weight: bold;
+
+    .area-size-container {
+      float: right;
+      font-weight: normal;
+      font-style: italic;
+    }
+  }
+
+  &:hover {
+    .layer {
+      background: #f4f4f4;
+      cursor: pointer;
+    }
+  }
+}
+
 /* --------- LEAFLET LEGEND --------- */
 
 .info {
-  padding: 8px 10px 0px;
   font: 14px/16px Arial, Helvetica, sans-serif;
-  background: white;
-  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  border: 2px solid rgba(0, 0, 0, 0.2);
   border-radius: 5px;
+
+  .inside-legend-container {
+    background: white;
+    padding: 8px 10px 1px;
+    border-radius: 5px;
+  }
 }
 
 .info h4 {
