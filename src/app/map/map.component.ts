@@ -164,6 +164,7 @@ export class MapComponent implements OnInit {
 
         setTimeout(() => {
           marker.openPopup();
+          this.stopTooltip();
 
           this.map.eachLayer((layer: any) => {
             if (layer._path) {
@@ -200,7 +201,11 @@ export class MapComponent implements OnInit {
     document.getElementById('zoomto-' + id).onclick = () => {
       _.forEach(this.markerGroup.getLayers(), (marker) => {
         if (marker.isPopupOpen()) {
-          this.map.fitBounds(new L.FeatureGroup([marker]).getBounds(), { padding: [30, 30], maxZoom: 18 });
+          const bounds = new L.FeatureGroup([marker]).getBounds();
+          this.map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+          setTimeout(() => {
+            this.map.panTo([this.map.getCenter().lat + 0.005, this.map.getCenter().lng])
+          }, 100);
         }
       });
     };
@@ -243,7 +248,7 @@ export class MapComponent implements OnInit {
   initControls() {
     this.map.zoomControl.setPosition('bottomright');
     L.control.mousePosition({ emptyString: 'Indisponível' }).addTo(this.map);
-    L.control.scale({ position: 'bottomleft' }).addTo(this.map);
+    L.control.scale({ position: 'bottomleft', imperial: false }).addTo(this.map);
 
     this.measureControl = L.control.measure({
       position: 'topright',
@@ -258,7 +263,6 @@ export class MapComponent implements OnInit {
     L.Control.Legends = L.Control.extend({
       onAdd: (map) => {
         const div = L.DomUtil.create('div', 'info legend');
-        console.log(div);
         div.onclick = (event) => {
           div.style.height = div.style.height === '100%' ? '35px' : '100%';
         }
