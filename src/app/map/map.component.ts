@@ -157,9 +157,9 @@ export class MapComponent implements OnInit {
 
     this.map.on('measureclick', (event: any) => {
       if (event.count > 0 && event.count < 3) {
-        this.mouseTooltip = 'Desenhe o polígono';
+        this.mouseTooltip = 'Desenhe um objeto de no mínimo 3 lados';
       } else if (event.count >= 3) {
-        this.mouseTooltip = 'Clique duas vezes para finalizar ou continue';
+        this.mouseTooltip = 'Clique duas vezes para finalizar ou continue desenhando';
       }
     });
 
