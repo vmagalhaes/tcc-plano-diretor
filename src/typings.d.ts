@@ -13,7 +13,7 @@ interface NodeModule {
 
 declare namespace L {
   namespace control {
-    function mousePosition();
+    function mousePosition(options: any);
     function measure(options: any);
     function legends(options: any);
     function layersContainer(options: any);

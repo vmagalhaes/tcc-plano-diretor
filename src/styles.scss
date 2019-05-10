@@ -44,6 +44,18 @@ body {
   color: #6b6b6b;
 }
 
+@media (max-width: 640px) {
+  .layers-container {
+    width: 8em !important;
+
+    .layer {
+      .area-size-container {
+        display: none;
+      }
+    }
+  }
+}
+
 .layers-container {
   width: 25em;
   border: 2px solid rgba(0, 0, 0, 0.2);
@@ -77,6 +89,8 @@ body {
   font: 14px/16px Arial, Helvetica, sans-serif;
   border: 2px solid rgba(0, 0, 0, 0.2);
   border-radius: 5px;
+  overflow: hidden;
+  height: 35px;
 
   .inside-legend-container {
     background: white;

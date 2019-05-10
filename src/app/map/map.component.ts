@@ -2,7 +2,7 @@ import { Component, OnInit, ElementRef } from '@angular/core';
 
 import * as _ from 'lodash';
 import * as L from 'leaflet';
-import turf from 'turf';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 import 'leaflet-mouse-position';
 import 'src/assets/js/leaflet-measure.pt_BR';
 import { ClickHandler } from 'src/app/map/handler/click-handler';
@@ -13,7 +13,24 @@ declare var UIkit: any;
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
-  styleUrls: ['./map.component.scss']
+  styleUrls: ['./map.component.scss'],
+  animations: [
+    trigger('slideInOut', [
+      state('in', style({
+        overflow: 'hidden',
+        height: '*',
+        width: '300px'
+      })),
+      state('out', style({
+        opacity: '0',
+        overflow: 'hidden',
+        height: '0px',
+        width: '0px'
+      })),
+      transition('in => out', animate('400ms ease-in-out')),
+      transition('out => in', animate('400ms ease-in-out'))
+    ])
+  ]
 })
 export class MapComponent implements OnInit {
 
@@ -35,6 +52,7 @@ export class MapComponent implements OnInit {
   mouseTooltip: string;
   polygonsCount: number = 0;
   measuring = false;
+  openedLegend = 'out';
   marker: any;
   markerGroup = new L.LayerGroup();
   captureClick: any;
@@ -67,97 +85,103 @@ export class MapComponent implements OnInit {
     });
 
     this.map.on('measurefinish', (event: any) => {
-      this.polygonsCount++;
-      this.stopTooltip();
-      let layerFeature: any;
-      this.measuring = false;
-      const bounds = new L.LatLngBounds(event.points);
-      const northWest = bounds.getNorthWest(),
-        northEast = bounds.getNorthEast(),
-        distance = northWest.distanceTo(northEast),
-        distanceFromCenter = distance / 2;
+      if (event.finish) {
+        this.polygonsCount++;
+        this.stopTooltip();
+        let layerFeature: any;
+        this.measuring = false;
+        const bounds = new L.LatLngBounds(event.points);
+        const northWest = bounds.getNorthWest(),
+          northEast = bounds.getNorthEast(),
+          distance = northWest.distanceTo(northEast),
+          distanceFromCenter = distance / 2;
 
-      const marker = <any>(L.marker(bounds.getCenter(), {
-        icon: L.divIcon({
+        const marker = <any>(L.marker(bounds.getCenter(), {
+          icon: L.divIcon({
             className: 'leaflet-mouse-marker',
             iconAnchor: [20, 20],
-            iconSize: [50, 50]
-        }),
-        opacity: 0
-      }));
-
-      this.map.eachLayer((layer: any) => {
-        if (layer.feature) {
-          if (this.isMarkerInsidePolygon([bounds.getCenter().lat, bounds.getCenter().lng], layer)) {
-            event.polygonsCount = this.polygonsCount;
-            event.layer = layer;
-            layerFeature = layer;
-            this.addLayer(event);
-            const customPopup =
-           `<h3>${'Polígono ' + event.polygonsCount}</h3>
-            <ul class="uk-list polygon-list uk-list-striped uk-margin-remove-top uk-margin-remove-bottom">
-              <li>
-                <div class="uk-child-width-1-2" uk-grid>
-                  <div>Área</div>
-                  <div class="uk-padding-remove-left color-data">${event.areaDisplay}</div>
-                </div>
-              </li>
-              ` +
-              _.map(Object.keys(layer.feature.properties), (key) => {
-                return `
-                <li>
-                  <div class="uk-child-width-1-2" uk-grid>
-                    <div>${key}</div>
-                    <div class="uk-padding-remove-left color-data">${layer.feature.properties[key]}</div>
-                  </div>
-                </li>`;
-              }).join('') +
-           `</ul>
-            <ul class="tasks uk-margin-remove-top">
-              <li><a id="zoomto-${this.polygonsCount}" class="js-zoom zoomto">Centralizar nesta área</a></li>
-              <li><a id="delete-${this.polygonsCount}" class="js-deletemarkup deletemarkup">Excluir</a></li>
-            </ul>
-            <hr class="uk-margin-small-top uk-margin-small-bottom">
-            <ul class="uk-margin-remove-top uk-padding-remove-left external-links">
-              <li><a target="_blank" href="http://www.pmf.sc.gov.br/arquivos/arquivos/pdf/18_07_2014_10.03.37.82e294196c4df9b7c1459599611bd6ee.pdf" class="link">Tabela de adequação de uso</a></li>
-              <li><a target="_blank" href="http://www.pmf.sc.gov.br/arquivos/arquivos/pdf/18_07_2014_10.02.53.9bc76f3acfe3be22bc5373423ae3f59b.pdf" class="link">Tabela de limites de ocupação</a></li>
-              <li><a target="_blank" href="https://leismunicipais.com.br/plano-diretor-florianopolis-sc" class="link">Plano diretor</a></li>
-            </lu>
-            `;
-
-            const customOptions = {
-              maxWidth: 800,
-              className : 'custom-popup',
-              polygonsCount: this.polygonsCount,
-              bounds
-            }
-
-            marker
-              .bindPopup(customPopup, customOptions)
-              .on('popupopen', (popupContainer) => {
-                this.deleteLayer(popupContainer.popup.options.polygonsCount);
-                this.zoomTo(popupContainer.popup.options.polygonsCount);
-              })
-              .addTo(this.map);
-          }
-        }
-      });
-
-      setTimeout(() => {
-        marker.openPopup();
+            iconSize: [60, 60]
+          }),
+          opacity: 0
+        }));
 
         this.map.eachLayer((layer: any) => {
-          if (layer._path) {
-            if (layer._path.classList[0] === 'layer-measure-resultarea') {
-              layer._path.onclick = () => {
-                marker.openPopup()
-              };
-              marker.layer = layerFeature;
-              this.markerGroup.addLayer(marker);
+          if (layer.feature) {
+            if (this.isMarkerInsidePolygon([bounds.getCenter().lat, bounds.getCenter().lng], layer)) {
+              event.polygonsCount = this.polygonsCount;
+              event.layer = layer;
+              layerFeature = layer;
+              this.addLayer(event);
+              const customPopup =
+             `<h3>${'Polígono ' + event.polygonsCount}</h3>
+              <ul class="uk-list polygon-list uk-list-striped uk-margin-remove-top uk-margin-remove-bottom">
+                <li>
+                  <div class="uk-child-width-1-2" uk-grid>
+                    <div>Área</div>
+                    <div class="uk-padding-remove-left color-data">${event.areaDisplay}</div>
+                  </div>
+                </li>
+                ` +
+                _.map(Object.keys(layer.feature.properties), (key) => {
+                  return `
+                  <li>
+                    <div class="uk-child-width-1-2" uk-grid>
+                      <div>${key}</div>
+                      <div class="uk-padding-remove-left color-data">${layer.feature.properties[key]}</div>
+                    </div>
+                  </li>`;
+                }).join('') +
+             `</ul>
+              <ul class="tasks uk-margin-remove-top">
+                <li><a id="zoomto-${this.polygonsCount}" class="js-zoom zoomto">Centralizar nesta área</a></li>
+                <li><a id="delete-${this.polygonsCount}" class="js-deletemarkup deletemarkup">Excluir</a></li>
+              </ul>
+              <hr class="uk-margin-small-top uk-margin-small-bottom">
+              <ul class="uk-margin-remove-top uk-padding-remove-left external-links">
+                <li><a target="_blank" href="http://www.pmf.sc.gov.br/arquivos/arquivos/pdf/18_07_2014_10.03.37.82e294196c4df9b7c1459599611bd6ee.pdf" class="link">Tabela de adequação de uso</a></li>
+                <li><a target="_blank" href="http://www.pmf.sc.gov.br/arquivos/arquivos/pdf/18_07_2014_10.02.53.9bc76f3acfe3be22bc5373423ae3f59b.pdf" class="link">Tabela de limites de ocupação</a></li>
+                <li><a target="_blank" href="https://leismunicipais.com.br/plano-diretor-florianopolis-sc" class="link">Plano diretor</a></li>
+              </lu>
+              `;
+
+              const customOptions = {
+                maxWidth: 800,
+                className : 'custom-popup',
+                polygonsCount: this.polygonsCount,
+                bounds
+              }
+
+              marker
+                .bindPopup(customPopup, customOptions)
+                .on('popupopen', (popupContainer) => {
+                  this.deleteLayer(popupContainer.popup.options.polygonsCount);
+                  this.zoomTo(popupContainer.popup.options.polygonsCount);
+                })
+                .addTo(this.map);
             }
           }
         });
-      });
+
+        setTimeout(() => {
+          marker.openPopup();
+
+          this.map.eachLayer((layer: any) => {
+            if (layer._path) {
+              if (layer._path.classList[0] === 'layer-measure-resultarea') {
+                layer._path.onclick = () => {
+                  marker.openPopup()
+                };
+                marker.layer = layerFeature;
+                this.markerGroup.addLayer(marker);
+                this.map.panTo([bounds.getCenter().lat + 0.01, bounds.getCenter().lng]);
+              }
+            }
+          });
+        });
+      } else {
+        this.stopTooltip();
+        this.measureControl._finishMeasure();
+      }
     });
 
     this.map.on('measureclick', (event: any) => {
@@ -176,7 +200,7 @@ export class MapComponent implements OnInit {
     document.getElementById('zoomto-' + id).onclick = () => {
       _.forEach(this.markerGroup.getLayers(), (marker) => {
         if (marker.isPopupOpen()) {
-          this.map.fitBounds(new L.FeatureGroup([marker]).getBounds(), { padding: [20, 20], maxZoom: 17 });
+          this.map.fitBounds(new L.FeatureGroup([marker]).getBounds(), { padding: [30, 30], maxZoom: 18 });
         }
       });
     };
@@ -218,7 +242,7 @@ export class MapComponent implements OnInit {
 
   initControls() {
     this.map.zoomControl.setPosition('bottomright');
-    L.control.mousePosition().addTo(this.map);
+    L.control.mousePosition({ emptyString: 'Indisponível' }).addTo(this.map);
     L.control.scale({ position: 'bottomleft' }).addTo(this.map);
 
     this.measureControl = L.control.measure({
@@ -234,6 +258,10 @@ export class MapComponent implements OnInit {
     L.Control.Legends = L.Control.extend({
       onAdd: (map) => {
         const div = L.DomUtil.create('div', 'info legend');
+        console.log(div);
+        div.onclick = (event) => {
+          div.style.height = div.style.height === '100%' ? '35px' : '100%';
+        }
         let labels = ['<div class="uk-margin-small-bottom"><strong>Zoneamento</strong></div>'],
         categories = [
           'ACI',

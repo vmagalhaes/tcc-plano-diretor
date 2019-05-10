@@ -783,6 +783,7 @@
             (this._measureVertexes = null),
             this._updateMeasureNotStarted(),
             this._collapse(),
+            e.finish = true,
             this._map.fire('measurefinish', e, !1);
         },
         _clearMeasure: function() {
@@ -914,6 +915,9 @@
                     ? t.openPopup(t.getBounds().getCenter())
                     : t.getLatLng && t.openPopup(t.getLatLng());
               }
+            } else if (!e.length) {
+              e.finish = false;
+              this._map.fire('measurefinish', e, !1);
             }
         },
         _handleMeasureClick: function(e) {
