@@ -113,7 +113,7 @@ export class MapComponent implements OnInit {
               layerFeature = layer;
               this.addLayer(event);
               const customPopup =
-             `<h3>${'Polígono ' + event.polygonsCount}</h3>
+             `<h3>${'Área ' + event.polygonsCount}</h3>
               <ul class="uk-list polygon-list uk-list-striped uk-margin-remove-top uk-margin-remove-bottom">
                 <li>
                   <div class="uk-child-width-1-2" uk-grid>
@@ -174,7 +174,7 @@ export class MapComponent implements OnInit {
                 };
                 marker.layer = layerFeature;
                 this.markerGroup.addLayer(marker);
-                this.map.panTo([bounds.getCenter().lat + 0.01, bounds.getCenter().lng]);
+                // this.map.panTo([bounds.getCenter().lat + 0.01, bounds.getCenter().lng]);
               }
             }
           });
