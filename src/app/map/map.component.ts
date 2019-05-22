@@ -65,13 +65,31 @@ export class MapComponent implements OnInit {
     this.map = L.map(document.getElementById('map'), this.options);
 
     this.ulandService
-      .getSources()
-      .subscribe((sources) => {
-        console.log(sources);
-      }, (error) => {
-        console.log(error);
-      });
+      .getLayers()
+      .subscribe((layer: any) => {
+        const template = layer.template;
+        this.ulandService
+          .getFeatures()
+          .subscribe((featuresData) => {
+            const features = _.map(featuresData, (feat) => {
+              const keys = Object.keys(feat);
+              let object = {};
+              
+              _.forEach((keys), (key) => {
+                _.assign(object, { [template[parseInt(key) - 1].key]: feat[parseInt(key)] });
+              });
 
+              return object;
+            });
+
+            this.startLayer(features);            
+          }, (error) => {
+            console.warn(error);
+          });  
+      }, (error) => {
+        console.warn(error);
+      });
+    
     if (!this.clickHandler) {
       this.clickHandler = new ClickHandler(this.map);
     }
@@ -193,7 +211,6 @@ export class MapComponent implements OnInit {
       }
     });
 
-    this.startLayer();
     this.initControls();
   }
 
@@ -297,7 +314,7 @@ export class MapComponent implements OnInit {
     L.control.legends({ position: 'topright' }).addTo(this.map);
   }
 
-  startLayer() {
+  startLayer(features: any) {
     let xhr = new XMLHttpRequest();
     xhr.open('GET', '../../assets/tcc-shapefile.geojson');
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -305,6 +322,14 @@ export class MapComponent implements OnInit {
     xhr.onload = () => {
       if (xhr.status !== 200) return
       const data = _.cloneDeep(xhr.response);
+      _.forEach(data.features, (feature) => {
+        const foundedProperties = _.find(features, ['mslink', feature.properties.mslink]);
+
+        if (foundedProperties) {
+          feature.properties = foundedProperties;
+        }
+      });
+
       L.geoJSON(data, {
         style: (feature) => {
           return {

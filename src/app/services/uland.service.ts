@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import * as _ from 'lodash';
-import { tap, catchError } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 
 import { RestClientService } from './rest-client.service';
 import { HttpClient } from '@angular/common/http';
@@ -15,28 +15,34 @@ export class UlandService extends RestClientService {
     super();
   }
 
-  getSources(): Observable<any[]> {
+  getFeatures(): Observable<any[]> {
     return this.http
-      .get('https://api.uland.com.br/sources/', this.buildRequestOptions())
+      .get('https://api.uland.com.br/projects/7/layers/83/features', this.buildRequestOptions())
       .pipe(
-        tap((response: any) => {
-          let sources = this.extract<any[]>(response);
-          return sources;
+        map((response: any) => {
+          let sources: any = this.extract<any[]>(response);
+          const features = this.unmarshalFeatures(sources.features);
+          return features;
         }),
         catchError((error) => this.handleError(error))
       );
   }
 
-  getData(): Observable<any[]> {
+  getLayers(): Observable<any[]> {
     return this.http
-      .post('https://api.uland.com.br/search', { sources: [7] }, this.buildRequestOptions())
+      .get('https://api.uland.com.br/projects/7/layers/83', this.buildRequestOptions())
       .pipe(
-        tap((response: any) => {
-          let sources = this.extract<any[]>(response);
-          return sources;
+        map((response: any) => {
+          return response;
         }),
         catchError((error) => this.handleError(error))
       );
+  }
+
+  unmarshalFeatures(sources: any[]) {
+    return _.map(sources, (source) => {
+      return source.geometry.geometries[0].properties;
+    });
   }
 
 }
