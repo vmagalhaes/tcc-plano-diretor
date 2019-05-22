@@ -56,6 +56,7 @@ export class MapComponent implements OnInit {
   marker: any;
   markerGroup = new L.LayerGroup();
   captureClick: any;
+  loading = false;
 
   constructor(
     private ulandService: UlandService
@@ -63,6 +64,21 @@ export class MapComponent implements OnInit {
 
   ngOnInit() {
     this.map = L.map(document.getElementById('map'), this.options);
+    this.loading = true;
+
+    UIkit.util.ready(() => {
+
+      let bar: any = document.getElementById('js-progressbar');
+
+      let animate = setInterval(() => {
+
+          bar.value += 10;
+
+          if (bar.value >= bar.max) {
+              clearInterval(animate);
+          }
+
+      }, 500);
 
     this.ulandService
       .getLayers()
@@ -74,22 +90,25 @@ export class MapComponent implements OnInit {
             const features = _.map(featuresData, (feat) => {
               const keys = Object.keys(feat);
               let object = {};
-              
+
               _.forEach((keys), (key) => {
-                _.assign(object, { [template[parseInt(key) - 1].key]: feat[parseInt(key)] });
+                const te = _.find(template, ['id', parseInt(key)]);
+                if (te) {
+                  _.assign(object, { [this.getKey(te.key)]: feat[parseInt(key)] });
+                }
               });
 
               return object;
             });
 
-            this.startLayer(features);            
+            this.startLayer(features, bar);
           }, (error) => {
             console.warn(error);
-          });  
+          });
       }, (error) => {
         console.warn(error);
       });
-    
+
     if (!this.clickHandler) {
       this.clickHandler = new ClickHandler(this.map);
     }
@@ -141,11 +160,12 @@ export class MapComponent implements OnInit {
                 </li>
                 ` +
                 _.map(Object.keys(layer.feature.properties), (key) => {
+                  const value = layer.feature.properties[key].replace(/\n/ig, '');
                   return `
                   <li>
                     <div class="uk-child-width-1-2" uk-grid>
-                      <div>${key}</div>
-                      <div class="uk-padding-remove-left color-data">${layer.feature.properties[key]}</div>
+                      <div style="padding-right: 10px">${key}</div>
+                      <div class="uk-padding-remove-left color-data">${value ? value : '-'}</div>
                     </div>
                   </li>`;
                 }).join('') +
@@ -212,6 +232,8 @@ export class MapComponent implements OnInit {
     });
 
     this.initControls();
+
+    });
   }
 
   zoomTo(id: number) {
@@ -314,7 +336,7 @@ export class MapComponent implements OnInit {
     L.control.legends({ position: 'topright' }).addTo(this.map);
   }
 
-  startLayer(features: any) {
+  startLayer(features: any, bar: any) {
     let xhr = new XMLHttpRequest();
     xhr.open('GET', '../../assets/tcc-shapefile.geojson');
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -322,11 +344,13 @@ export class MapComponent implements OnInit {
     xhr.onload = () => {
       if (xhr.status !== 200) return
       const data = _.cloneDeep(xhr.response);
-      _.forEach(data.features, (feature) => {
-        const foundedProperties = _.find(features, ['mslink', feature.properties.mslink]);
-
+      _.forEach(data.features, (feature, index) => {
+        const foundedProperties = _.find(features, ['ID', feature.properties.mslink.toString()]);
         if (foundedProperties) {
           feature.properties = foundedProperties;
+        } else {
+          console.log(feature.properties)
+          console.log(index)
         }
       });
 
@@ -337,10 +361,13 @@ export class MapComponent implements OnInit {
               opacity: 1,
               color: 'white',
               fillOpacity: 0.7,
-              fillColor: this.getColor(feature.properties.nm_zon)
+              fillColor: this.getColor(feature.properties['Sigla'])
           };
         }
       }).addTo(this.map);
+
+      bar.value = 100;
+      this.loading = false;
     };
     xhr.send();
   }
@@ -412,6 +439,51 @@ export class MapComponent implements OnInit {
     }
 
     return inside;
-  };
+  }
+
+  getKey(key: string) {
+    switch (key) {
+      case 'mslink':
+        return 'ID';
+      case 'cd_zon':
+        return 'Código da Zona';
+      case 'tp_zon':
+        return 'Tipo';
+      case 'nm_zon':
+        return 'Sigla';
+      case 'nome':
+        return 'Nome';
+      case 'macroRegiao':
+        return 'Macro Região';
+      case 'residenciasUnifamiliares':
+        return 'Residencias Unifamiliares';
+      case 'condominiosResidenciaisUnifamiliares':
+        return 'Condomínios Residenciais Unifamiliares';
+      case 'condominiosResidenciaisMultifamiliares':
+        return 'Condomínios Residenciais Multifamiliares';
+      case 'condominiosSalasComerciais':
+        return 'Condomínios Salas Comerciais';
+      case 'numeroMaxPavimentosComTDC':
+        return 'Número Max. de Pavimentos com TDC';
+      case 'taxaOcupacaoMax':
+        return 'Taxa de Ocupação Max.';
+      case 'taxaImpermeabilizacaoMax':
+        return 'Taxa de Impermeabilização Max.';
+      case 'alturaMaxFachadaEateCumeeira':
+        return 'Altura Max. da Fachada/até Cumeeira';
+      case 'coeficienteAproveitamentoMax':
+        return 'Coeficiente de Aproveitamento Max.';
+      case 'areaMinima':
+        return 'Área Mínima';
+      case 'testadaMinima':
+        return 'Testada Mínima';
+      case 'densidadeLiquida':
+        return 'Densidade Líquida';
+      case 'observacoes':
+        return 'Observações';
+      case 'preRequisitos':
+        return 'Pré requisitos';
+    }
+  }
 
 }

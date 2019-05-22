@@ -17,7 +17,7 @@ export class UlandService extends RestClientService {
 
   getFeatures(): Observable<any[]> {
     return this.http
-      .get('https://api.uland.com.br/projects/7/layers/83/features', this.buildRequestOptions())
+      .get('https://api.uland.com.br/projects/7/layers/88/features', this.buildRequestOptions())
       .pipe(
         map((response: any) => {
           let sources: any = this.extract<any[]>(response);
@@ -30,7 +30,7 @@ export class UlandService extends RestClientService {
 
   getLayers(): Observable<any[]> {
     return this.http
-      .get('https://api.uland.com.br/projects/7/layers/83', this.buildRequestOptions())
+      .get('https://api.uland.com.br/projects/7/layers/88', this.buildRequestOptions())
       .pipe(
         map((response: any) => {
           return response;
