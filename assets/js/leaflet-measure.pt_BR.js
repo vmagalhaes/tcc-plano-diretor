@@ -657,7 +657,7 @@
           activeColor: '#ABE67E',
           completedColor: '#C8F2BE',
           captureZIndex: 1e4,
-          polygonName: 'Poligono',
+          polygonName: 'Área',
           popupOptions: { className: 'leaflet-measure-resultpopup', autoPanPadding: [10, 10] }
         },
         initialize: function(e) {
