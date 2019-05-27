@@ -672,6 +672,7 @@
           return (
             (this._map = e),
             (this._latlngs = []),
+            (this.t = {}),
             (this.count = 0),
             this._initLayout(),
             e.on('click', this._collapse, this),
@@ -880,9 +881,9 @@
                     (r = b({ model: n })))
                   : 2 === e.length
                   ? ((t = L.polyline(e, this._symbols.getSymbol('resultLine'))),
-                    (r = _({ model: L.extend({}, n, this._getMeasurementDisplayStrings(n)) })))
+                    (r = _({ model: L.extend(n, this._getMeasfurementDisplayStrings(n)) })))
                   : ((t = L.polygon(e, this._symbols.getSymbol('resultArea'))),
-                    (r = j({ model: L.extend({}, n, this._getMeasurementDisplayStrings(n)) })));
+                    (r = j({ model: L.extend(n, this._getMeasurementDisplayStrings(n)) })));
                 var o = L.DomUtil.create('div', '');
                 o.innerHTML = r;
                 var i = (0, c.selectOne)('.js-zoomto', o);
@@ -910,6 +911,7 @@
                     this
                   )),
                   t.addTo(this._layer),
+                  this.options.popupOptions.layer = t,
                   t.bindPopup(o, this.options.popupOptions),
                   t.getBounds
                     ? t.openPopup(t.getBounds().getCenter())
