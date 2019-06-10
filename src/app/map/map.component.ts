@@ -33,6 +33,8 @@ declare var UIkit: any;
   ]
 })
 export class MapComponent implements OnInit {
+  deletedLayer: any;
+  deleteArea: number;
 
   map: L.Map;
   clickHandler: ClickHandler;
@@ -148,7 +150,7 @@ export class MapComponent implements OnInit {
               event.polygonsCount = this.polygonsCount;
               event.layer = layer;
               layerFeature = layer;
-              this.addLayer(event);
+              this.addLayer(event);              
               const customPopup =
              `<h3>${'Área ' + event.polygonsCount}</h3>
               <ul class="uk-list polygon-list uk-list-striped uk-margin-remove-top uk-margin-remove-bottom">
@@ -172,7 +174,7 @@ export class MapComponent implements OnInit {
              `</ul>
               <ul class="tasks uk-margin-remove-top">
                 <li><a id="zoomto-${this.polygonsCount}" class="js-zoom zoomto">Centralizar nesta área</a></li>
-                <li><a id="delete-${this.polygonsCount}" class="js-deletemarkup deletemarkup">Excluir</a></li>
+                <li><a id="delete-${this.polygonsCount}" href="#modal-center" uk-toggle class="js-deletemarkup deletemarkup">Excluir</a></li>
               </ul>
               <hr class="uk-margin-small-top uk-margin-small-bottom">
               <ul class="uk-margin-remove-top uk-padding-remove-left external-links">
@@ -192,6 +194,15 @@ export class MapComponent implements OnInit {
               marker
                 .bindPopup(customPopup, customOptions)
                 .on('popupopen', (popupContainer) => {
+                  const centerToArea = () => {
+                    const bounds = new L.FeatureGroup([marker]).getBounds();
+                    this.map.fitBounds(bounds, { padding: [30, 30], maxZoom: 18 });
+                    // setTimeout(() => {
+                    //   this.map.panTo([this.map.getCenter().lat + 0.005, this.map.getCenter().lng])
+                    // }, 100);
+                  }
+        
+                  marker.centerToAreaFunction = centerToArea;
                   this.deleteLayer(popupContainer.popup.options.polygonsCount);
                   this.zoomTo(popupContainer.popup.options.polygonsCount);
                 })
@@ -210,7 +221,7 @@ export class MapComponent implements OnInit {
                 layer._path.onclick = () => {
                   marker.openPopup()
                 };
-                marker.layer = layerFeature;
+                marker.layer = layer;
                 this.markerGroup.addLayer(marker);
                 // this.map.panTo([bounds.getCenter().lat + 0.01, bounds.getCenter().lng]);
               }
@@ -232,19 +243,14 @@ export class MapComponent implements OnInit {
     });
 
     this.initControls();
-
     });
   }
 
   zoomTo(id: number) {
     document.getElementById('zoomto-' + id).onclick = () => {
       _.forEach(this.markerGroup.getLayers(), (marker) => {
-        if (marker.isPopupOpen()) {
-          const bounds = new L.FeatureGroup([marker]).getBounds();
-          this.map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
-          setTimeout(() => {
-            this.map.panTo([this.map.getCenter().lat + 0.005, this.map.getCenter().lng])
-          }, 100);
+        if (marker._popup.options.polygonsCount === id) {
+          marker.centerToAreaFunction();
         }
       });
     };
@@ -252,15 +258,22 @@ export class MapComponent implements OnInit {
 
   deleteLayer(id: number) {
     document.getElementById('delete-' + id).onclick = () => {
+      this.deleteArea = id;
       _.forEach(this.markerGroup.getLayers(), (marker) => {
-        if (marker.isPopupOpen()) {
-          this.map.removeLayer(marker.layer);
-          this.map.removeLayer(marker);
-          this.markerGroup.removeLayer(marker);
-          this.polygonsCount--;
+        if (marker._popup.options.polygonsCount === id) {
+          this.deletedLayer = marker;
         }
       });
     };
+  }
+
+  onDeleteArea() {
+    this.map.removeLayer(this.deletedLayer.layer);
+    this.markerGroup.removeLayer(this.deletedLayer);
+    this.map.removeLayer(this.deletedLayer);    
+    document.getElementById(`layers-container-${this.deletedLayer._popup.options.polygonsCount}`).remove();
+    this.deletedLayer = undefined;
+    this.polygonsCount--;
   }
 
   startMeasure() {
@@ -302,9 +315,9 @@ export class MapComponent implements OnInit {
     L.Control.Legends = L.Control.extend({
       onAdd: (map) => {
         const div = L.DomUtil.create('div', 'info legend');
-        div.onclick = (event) => {
-          div.style.height = div.style.height === '100%' ? '35px' : '100%';
-        }
+        // div.onclick = (event) => {
+        div.style.height = '100%';
+        // }
         let labels = ['<div class="uk-margin-small-bottom"><strong>Zoneamento</strong></div>'],
         categories = [
           'ACI',
@@ -390,17 +403,15 @@ export class MapComponent implements OnInit {
     }
 
     L.control.layersContainer({ position: 'topleft' }).addTo(this.map);
+
     document.getElementById('layer-' + layer.polygonsCount).onclick = (event: any) => {
       const split = event.target.parentNode.id.split('-');
-
+      console.log(split);
       this.markerGroup.eachLayer((marker: any) => {
-        if (marker.layer._leaflet_id === layer.layer._leaflet_id) {
+        if (marker._popup.options.polygonsCount === parseInt(split[split.length - 1])) {
           setTimeout(() => {
             marker.openPopup();
-            this.zoomTo(parseInt(split[split.length - 1]));
-            setTimeout(() => {
-              document.getElementById('zoomto-' + split[split.length - 1]).click();
-            });
+            marker.centerToAreaFunction();
           });
         }
       });

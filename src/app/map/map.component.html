@@ -21,3 +21,16 @@
     <button (click)="measuring ? stopMeasure() : startMeasure()" class="uk-button uk-button-primary">{{ measuring ? 'Finalizar desenho' : 'Iniciar busca' }}</button>
   </div>
 </div>
+
+<a class="uk-button uk-button-default" href="#modal-center" uk-toggle>Open</a>
+
+<div id="modal-center" class="uk-flex-top" uk-modal>
+  <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
+    <button class="uk-modal-close-default" type="button" uk-close></button>
+    <p>Tem certeza que deseja deletar esta área?</p>
+    <p class="uk-text-right">
+      <button (click)="deletedLayer=undefined" class="uk-button uk-button-default uk-modal-close" type="button">Cancelar</button>
+      <button (click)="onDeleteArea()" class="uk-button uk-button-danger uk-modal-close" style="margin-left: 10px;" type="button">Remover</button>
+    </p>
+  </div>
+</div>
