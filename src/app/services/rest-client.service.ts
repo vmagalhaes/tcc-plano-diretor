@@ -16,10 +16,11 @@ export abstract class RestClientService {
     let headers: HttpHeaders = new HttpHeaders();
     headers = headers.append('Accept', 'application/json');
     headers = headers.append('Content-Type', 'application/json; charset=UTF-8');
-    headers = headers.append('Uland-Api-Key', 'qC3CAUwf3TAJ2K8ODmDCpg');
+    headers = headers.append('token-type', 'Bearer');
     headers = headers.append('uid', 'viictorg1@gmail.com');
     headers = headers.append('access-token', 'cH4kHsuWxFUfEh5Ze0XS-w');
-    headers = headers.append('client', '4IjQxiw7lCkLsIXWNVjXeg');
+    headers = headers.append('expiry', '1575481594');
+    headers = headers.append('client', '_QmvP_EirnG6pE2KthgLjQ');
 
     const params = this.buildSearchParams(queryParams);
 
