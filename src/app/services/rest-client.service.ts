@@ -18,7 +18,7 @@ export abstract class RestClientService {
     headers = headers.append('Content-Type', 'application/json; charset=UTF-8');
     headers = headers.append('Uland-Api-Key', 'qC3CAUwf3TAJ2K8ODmDCpg');
     headers = headers.append('uid', 'viictorg1@gmail.com');
-    headers = headers.append('access-token', 'eQy7oEcFalq26NcDWpjcVg');
+    headers = headers.append('access-token', 'cH4kHsuWxFUfEh5Ze0XS-w');
     headers = headers.append('client', '4IjQxiw7lCkLsIXWNVjXeg');
 
     const params = this.buildSearchParams(queryParams);
