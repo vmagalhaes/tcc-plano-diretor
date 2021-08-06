@@ -18,9 +18,9 @@ export abstract class RestClientService {
     headers = headers.append('Content-Type', 'application/json; charset=UTF-8');
     headers = headers.append('token-type', 'Bearer');
     headers = headers.append('uid', 'viictorg1@gmail.com');
-    headers = headers.append('access-token', 'cH4kHsuWxFUfEh5Ze0XS-w');
-    headers = headers.append('expiry', '1575481594');
-    headers = headers.append('client', '_QmvP_EirnG6pE2KthgLjQ');
+    headers = headers.append('access-token', 'WbEEbjMIXBvNXPAxpd3DNQ');
+    headers = headers.append('expiry', '1629454180');
+    headers = headers.append('client', 'MaKPSV4S14JnTeKhtmcBtg');
 
     const params = this.buildSearchParams(queryParams);
 
